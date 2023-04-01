@@ -80,7 +80,7 @@ const upload = multer({ storage });
 app.post("/upload", upload.single("file"), (req: Request, res: Response) => {
     try {
         // si se guardó correctamente, se devuelve la ruta del archivo guardado
-        res.send({ success: true, fileUrl: `/uploads/${req.file.filename}` });
+        res.send({ success: true, fileUrl: `${req.file.filename}` });
     } catch (error) {
         console.error(error);
         res.status(500).send({ success: false, message: "Error al guardar el archivo" });
