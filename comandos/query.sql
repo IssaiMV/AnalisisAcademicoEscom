@@ -3,6 +3,8 @@ CREATE TABLE usuario (
   nombre VARCHAR(50) NOT NULL,
   apellido_paterno VARCHAR(50) NOT NULL,
   apellido_materno VARCHAR(50) NOT NULL,
+  email VARCHAR(50) NOT NULL,
+  password VARCHAR(50) NOT NULL,
   activo TINYINT(1) NOT NULL DEFAULT 1,
   rol ENUM('Profesor', 'Coordinador', 'Evaluador') NOT NULL,
   coordinador_id INT NULL,
