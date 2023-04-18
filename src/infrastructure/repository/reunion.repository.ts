@@ -24,7 +24,9 @@ export class ReunionRepository {
     }
 
     async modificarReunion(myDataSource: any, id: number, reunion: Reunion): Promise<Reunion | undefined> {
-        const entityExistente = await myDataSource.findOne(Reunion, id);
+        const entityExistente = await myDataSource.getRepository(Reunion).findOneBy({
+            id: id,
+        });
         if (entityExistente) {
             const entityModificado = Object.assign(entityExistente, reunion);
             return await myDataSource.getRepository(Reunion).save(entityModificado);

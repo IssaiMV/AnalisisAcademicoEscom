@@ -30,6 +30,11 @@ export class UsuarioRepository {
         return results;
     }
 
+    async obtenerUsuarioPorEmail(myDataSource: any, email: string): Promise<Usuario | undefined> {
+        const user = await myDataSource.getRepository(Usuario).findOneBy({ email: email });
+        return user;
+    }
+
     async modificarUsuario(myDataSource: any, id: number, usuario: Usuario): Promise<Usuario | undefined> {
         const usuarioExistente = await myDataSource.getRepository(Usuario).findOneBy({
             id: id,
