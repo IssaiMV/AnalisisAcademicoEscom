@@ -17,14 +17,24 @@ export class AsistenciaRepository {
     }
 
     async obtenerAsistenciaPorId(myDataSource: any, id: number): Promise<Asistencia | undefined> {
-        const asistencia = await myDataSource.getRepository(Asistencia).findOne(id);
+        const asistencia = await myDataSource.getRepository(Asistencia).findOneBy({
+            id: id,
+        });
+        return asistencia;
+    }
+    async obtenerAsistenciasPorReunionId(myDataSource: any, id: number): Promise<Asistencia[] | undefined> {
+        const asistencia = await myDataSource.getRepository(Asistencia).findBy({
+            reunionId: id,
+        });
         return asistencia;
     }
 
     async modificarAsistencia(myDataSource: any, id: number, asistencia: Asistencia): Promise<Asistencia | undefined> {
-        const asistenciaExistente = await myDataSource.getRepository(Asistencia).findOne(id);
-        if (asistenciaExistente) {
-            const asistenciaModificada = Object.assign(asistenciaExistente, asistencia);
+        const entityExistente = await myDataSource.getRepository(Asistencia).findOneBy({
+            id: id,
+        });
+        if (entityExistente) {
+            const asistenciaModificada = Object.assign(entityExistente, asistencia);
             const resultado = await myDataSource.getRepository(Asistencia).save(asistenciaModificada);
             return resultado;
         }
@@ -33,6 +43,11 @@ export class AsistenciaRepository {
 
     async eliminarAsistencia(myDataSource: any, id: number): Promise<boolean> {
         const resultado = await myDataSource.getRepository(Asistencia).delete(id);
+        return resultado.affected !== 0;
+    }
+
+    async eliminarAsistenciaReunionId(myDataSource: any, id: number): Promise<boolean> {
+        const resultado = await myDataSource.getRepository(Asistencia).delete({ reunionId: id });
         return resultado.affected !== 0;
     }
 }

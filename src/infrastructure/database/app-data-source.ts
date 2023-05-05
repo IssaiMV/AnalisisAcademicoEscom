@@ -10,5 +10,5 @@ export const myDataSource = new DataSource({
     database: "ipn",
     entities: entities,
     logging: true,
-    synchronize: false,
+    synchronize: false
 })

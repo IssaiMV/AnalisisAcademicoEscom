@@ -23,6 +23,11 @@ export class UsuarioRepository {
         return results;
     }
 
+    async obtenerUsuariosPorId(myDataSource: any, ids: number[]): Promise<Usuario[]> {
+        const users = await myDataSource.getRepository(Usuario).findByIds(ids);
+        return users;
+    }
+
     async obtenerUsuariosPorIdCoordinador(myDataSource: any, id: number): Promise<Usuario | undefined> {
         const results = await myDataSource.getRepository(Usuario).findOneBy({
             coordinadorId: id,

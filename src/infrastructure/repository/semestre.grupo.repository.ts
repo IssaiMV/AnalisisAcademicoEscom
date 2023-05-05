@@ -1,9 +1,14 @@
 import { SemestreGrupo } from "../entity/SemestreGrupo";
+import { GrupoRepository } from "./grupo.repository";
+import { SemestreRepository } from "./semestre.repository";
 
 export class SemestreGrupoRepository {
 
     constructor() {
     }
+
+    semestreRepository = new SemestreRepository()
+    grupoRepository = new GrupoRepository()
 
     async crearSemestreGrupo(myDataSource: any, semestreGrupo: SemestreGrupo): Promise<SemestreGrupo> {
         const entity = await myDataSource.getRepository(SemestreGrupo).create(semestreGrupo)
@@ -12,13 +17,27 @@ export class SemestreGrupoRepository {
     }
 
     async obtenerSemestresGrupos(myDataSource: any): Promise<SemestreGrupo[]> {
-        const entities = await myDataSource.getRepository(SemestreGrupo).find()
+        const entities = await myDataSource.getRepository(SemestreGrupo).find({
+            relations: {
+                semestre: true,
+                grupo: true,
+            }
+        })
         return entities;
     }
 
     async obtenerSemestreGrupoPorId(myDataSource: any, id: number): Promise<SemestreGrupo | undefined> {
         const results = await myDataSource.getRepository(SemestreGrupo).findOneBy({
-            id: id,
+            id: id
+        })
+        return results;
+    }
+    async obtenerGrupoPorSemestreId(myDataSource: any, id: number): Promise<SemestreGrupo | undefined> {
+        const results = await myDataSource.getRepository(SemestreGrupo).find({
+            relations: ['grupo'],
+            where: {
+                semestreId: id
+            }
         })
         return results;
     }

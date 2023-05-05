@@ -17,12 +17,12 @@ export class DocumentoRepository {
     }
 
     async obtenerDocumentoPorId(myDataSource: any, id: number): Promise<Documento | undefined> {
-        const result = await myDataSource.getRepository(Documento).findOne(id);
+        const result = await myDataSource.getRepository(Documento).findOneBy({ id: id });
         return result;
     }
 
     async modificarDocumento(myDataSource: any, id: number, documento: Documento): Promise<Documento | undefined> {
-        const documentoExistente = await myDataSource.getRepository(Documento).findOne(id);
+        const documentoExistente = await myDataSource.getRepository(Documento).findOneBy({ id: id });
         if (documentoExistente) {
             const documentoModificado = Object.assign(documentoExistente, documento);
             return await myDataSource.getRepository(Documento).save(documentoModificado);

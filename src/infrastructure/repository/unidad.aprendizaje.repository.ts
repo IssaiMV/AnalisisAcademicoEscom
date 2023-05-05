@@ -17,12 +17,12 @@ export class UnidadDeAprendizajeRepository {
     }
 
     async obtenerUnidadDeAprendizajePorId(myDataSource: any, id: number): Promise<UnidadDeAprendizaje | undefined> {
-        const unidadDeAprendizaje = await myDataSource.getRepository(UnidadDeAprendizaje).findOne(id)
+        const unidadDeAprendizaje = await myDataSource.getRepository(UnidadDeAprendizaje).findOneBy({ id: id })
         return unidadDeAprendizaje;
     }
 
     async modificarUnidadDeAprendizaje(myDataSource: any, id: number, unidadDeAprendizaje: UnidadDeAprendizaje): Promise<UnidadDeAprendizaje | undefined> {
-        const unidadDeAprendizajeExistente = await myDataSource.getRepository(UnidadDeAprendizaje).findOne(id);
+        const unidadDeAprendizajeExistente = await myDataSource.getRepository(UnidadDeAprendizaje).findOneBy({ id: id });
         if (unidadDeAprendizajeExistente) {
             const unidadDeAprendizajeModificada = Object.assign(unidadDeAprendizajeExistente, unidadDeAprendizaje);
             return await myDataSource.getRepository(UnidadDeAprendizaje).save(unidadDeAprendizajeModificada);

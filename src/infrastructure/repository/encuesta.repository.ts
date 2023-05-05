@@ -11,7 +11,10 @@ export class EncuestaRepository {
     }
 
     async obtenerEncuestas(myDataSource: any): Promise<Encuesta[]> {
-        const encuestas = await myDataSource.getRepository(Encuesta).find()
+        const encuestas = await myDataSource.getRepository(Encuesta).find({
+            relations: ['unidadDeAprendizaje', 'usuario', 'usuario.coordinador', 'semestreGrupo.grupo', 'semestreGrupo.semestre'],
+
+        })
         return encuestas;
     }
 

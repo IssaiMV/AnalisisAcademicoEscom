@@ -5,6 +5,7 @@ import {
     ManyToOne,
     JoinColumn,
     OneToMany,
+    JoinTable,
 } from 'typeorm';
 import { SemestreGrupo } from './SemestreGrupo';
 import { Usuario } from './Usuario';
