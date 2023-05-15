@@ -12,7 +12,9 @@ export class DocumentoRepository {
     }
 
     async obtenerDocumentos(myDataSource: any): Promise<Documento[]> {
-        const documentos = await myDataSource.getRepository(Documento).find();
+        const documentos = await myDataSource.getRepository(Documento).find({
+            relations: ['usuario'],
+        });
         return documentos;
     }
 

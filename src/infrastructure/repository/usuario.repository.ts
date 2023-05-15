@@ -12,7 +12,9 @@ export class UsuarioRepository {
     }
 
     async obtenerUsuarios(myDataSource: any): Promise<Usuario[]> {
-        const users = await myDataSource.getRepository(Usuario).find()
+        const users = await myDataSource.getRepository(Usuario).find({
+            relations: ['coordinador'],
+        })
         return users;
     }
 

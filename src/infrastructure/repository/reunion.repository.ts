@@ -12,7 +12,9 @@ export class ReunionRepository {
     }
 
     async obtenerReuniones(myDataSource: any): Promise<Reunion[]> {
-        const entities = await myDataSource.getRepository(Reunion).find()
+        const entities = await myDataSource.getRepository(Reunion).find({
+            relations: ['coordinador'],
+        })
         return entities;
     }
 

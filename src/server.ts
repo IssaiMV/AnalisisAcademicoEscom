@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
@@ -20,6 +20,12 @@ import { Encuesta } from "./infrastructure/entity/Encuesta";
 import { UnidadDeAprendizajeRepository } from "./infrastructure/repository/unidad.aprendizaje.repository";
 import { SemestreRepository } from "./infrastructure/repository/semestre.repository";
 import { SemestreGrupoRepository } from "./infrastructure/repository/semestre.grupo.repository";
+import { Rol, Usuario } from "./infrastructure/entity/Usuario";
+import { ProblematicasGrupoRepository } from "./infrastructure/repository/problematicas.grupo.repository";
+import { EncuestaProblematicasGrupoRepository } from "./infrastructure/repository/encuesta.problematicas.grupo.repository";
+import { DificultadEstudianteRepository } from "./infrastructure/repository/dificultad.estudiante.repository";
+import { EncuestaProblematicasGrupo } from "./infrastructure/entity/EncuestaProblematicasGrupo";
+import { DificultadEstudiantes } from "./infrastructure/entity/DificultadEstudiantes";
 
 
 dotenv.config();
@@ -51,42 +57,87 @@ const encuestaRepository = new EncuestaRepository()
 const unidadDeAprendizajeRepository = new UnidadDeAprendizajeRepository()
 const semestreRepository = new SemestreRepository()
 const semestreGrupoRepository = new SemestreGrupoRepository()
+const problematicasGrupoRepository = new ProblematicasGrupoRepository()
+const encuestaProblematicasGrupoRepository = new EncuestaProblematicasGrupoRepository()
+const dificultadEstudianteRepository = new DificultadEstudianteRepository()
+
+
+interface RequestWithUsuario extends Request {
+    usuario: any; // Aquí puedes definir el tipo de usuario según tus necesidades
+}
+
+// Middleware para verificar el token JWT
+export const verificarToken = (req: RequestWithUsuario, res: Response, next: NextFunction) => {
+    // Obtener el token de la cabecera de autorización
+    const token = req.headers.authorization?.split(' ')[1];
+
+    // Si no hay token, enviar un error
+    if (!token) {
+        return res.status(401).json({ error: 'Token no proporcionado' });
+    }
+
+    try {
+        // Verificar y decodificar el token
+        const decodedToken = jwt.verify(token, process.env.JWT_SECRET || 'mi-secreto-super-seguro');
+
+        // Adjuntar los datos del usuario decodificado al objeto de solicitud
+        req.usuario = decodedToken;
+
+        // Pasar al siguiente middleware
+        next();
+    } catch (error) {
+        // Si el token es inválido o ha expirado, enviar un error
+        return res.status(401).json({ error: 'Token inválido o expirado' });
+    }
+};
+
+// Aplicar el middleware de verificación de token a todas las rutas, excepto a la ruta /auth
+app.use((req: RequestWithUsuario, res: Response, next: NextFunction) => {
+    if (req.path !== '/auth') {
+        verificarToken(req, res, next);
+    } else {
+        next();
+    }
+});
 
 
 //Usuarios
-app.get("/users", async (req: Request, res: Response) => {
-    const users = await usuarioRepository.obtenerUsuarios(myDataSource)
-    res.json(users)
+app.get("/users", async (req: RequestWithUsuario, res: Response) => {
+    let users = await usuarioRepository.obtenerUsuarios(myDataSource)
+    if (req.usuario.rol === Rol.COORDINADOR) {
+        users = users.filter((user: Usuario) => user.coordinadorId === req.usuario.id)
+    }
+    res.json(removePasswordFromJSON(users))
 })
 
-app.get("/users/:id", async function (req: Request, res: Response) {
+app.get("/users/:id", async function (req: RequestWithUsuario, res: Response) {
     const results = await usuarioRepository.obtenerUsuarioPorId(myDataSource, parseInt(req.params.id))
-    return res.send(results)
+    return res.send(removePasswordFromJSON(results))
 })
 
-app.get("/users/ids/:ids", async function (req: Request, res: Response) {
+app.get("/users/ids/:ids", async function (req: RequestWithUsuario, res: Response) {
     const { ids } = req.params;
     const idList = ids.split(',').map((id) => parseInt(id, 10));
     const usuarios = await usuarioRepository.obtenerUsuariosPorId(myDataSource, idList);
-    return res.send(usuarios);
+    return res.send(removePasswordFromJSON(usuarios));
 })
 
-app.get("/users/coordinador/:id", async function (req: Request, res: Response) {
+app.get("/users/coordinador/:id", async function (req: RequestWithUsuario, res: Response) {
     const results = await usuarioRepository.obtenerUsuariosPorIdCoordinador(myDataSource, parseInt(req.params.id))
-    return res.send(results)
+    return res.send(removePasswordFromJSON(results))
 })
 
-app.post("/users", async function (req: Request, res: Response) {
+app.post("/users", async function (req: RequestWithUsuario, res: Response) {
     const results = await usuarioRepository.crearUsuario(myDataSource, req.body)
     return res.send(results)
 })
 
-app.put("/users/:id", async function (req: Request, res: Response) {
+app.put("/users/:id", async function (req: RequestWithUsuario, res: Response) {
     const results = await usuarioRepository.modificarUsuario(myDataSource, parseInt(req.params.id), req.body)
     return res.send(removePasswordFromJSON(results))
 })
 
-app.delete("/users/:id", async function (req: Request, res: Response) {
+app.delete("/users/:id", async function (req: RequestWithUsuario, res: Response) {
     const results = await usuarioRepository.eliminarUsuario(myDataSource, parseInt(req.params.id))
     return res.send(results)
 })
@@ -95,17 +146,24 @@ app.delete("/users/:id", async function (req: Request, res: Response) {
  * Documentos
  */
 // Obtener todos los documentos
-app.get("/documentos", async (req: Request, res: Response) => {
+app.get("/documentos", async (req: RequestWithUsuario, res: Response) => {
     try {
-        const documentos = await documentoRepository.obtenerDocumentos(myDataSource);
-        res.json(documentos);
+        let documentos = await documentoRepository.obtenerDocumentos(myDataSource);
+        if (req.usuario.rol === Rol.PROFESOR) {
+            documentos = documentos.filter((documento: Documento) => documento.usuarioId === req.usuario.id)
+        }
+        if (req.usuario.rol === Rol.COORDINADOR) {
+            documentos = documentos.filter((documento: Documento) => documento.usuarioId === req.usuario.id || documento.usuario.coordinadorId === req.usuario.id)
+        }
+        res.json(removePasswordFromJSON(documentos));
     } catch (error) {
+        console.log(error);
         res.status(500).json({ error: error.message });
     }
 });
 
 // Obtener un documento por su id
-app.get("/documentos/:id", async (req: Request, res: Response) => {
+app.get("/documentos/:id", async (req: RequestWithUsuario, res: Response) => {
     try {
         const { id } = req.params;
         const documento = await documentoRepository.obtenerDocumentoPorId(myDataSource, parseInt(id));
@@ -120,7 +178,7 @@ app.get("/documentos/:id", async (req: Request, res: Response) => {
 });
 
 // Crear un nuevo documento
-app.post("/documentos/", async (req: Request, res: Response) => {
+app.post("/documentos/", async (req: RequestWithUsuario, res: Response) => {
     try {
         const documento = req.body as Documento;
         const nuevoDocumento = await documentoRepository.crearDocumento(myDataSource, documento);
@@ -131,7 +189,7 @@ app.post("/documentos/", async (req: Request, res: Response) => {
 });
 
 // Actualizar un documento existente
-app.put("/documentos/:id", async (req: Request, res: Response) => {
+app.put("/documentos/:id", async (req: RequestWithUsuario, res: Response) => {
     try {
         const { id } = req.params;
         const documento = req.body as Documento;
@@ -147,7 +205,7 @@ app.put("/documentos/:id", async (req: Request, res: Response) => {
 });
 
 // Eliminar un documento existente
-app.delete("/documentos/:id", async (req: Request, res: Response) => {
+app.delete("/documentos/:id", async (req: RequestWithUsuario, res: Response) => {
     try {
         const { id } = req.params;
         const eliminado = await documentoRepository.eliminarDocumento(myDataSource, parseInt(id));
@@ -165,9 +223,15 @@ app.delete("/documentos/:id", async (req: Request, res: Response) => {
  * Encuestas
  */
 // Obtener todas las encuestas
-app.get("/encuestas", async (req: Request, res: Response) => {
+app.get("/encuestas", async (req: RequestWithUsuario, res: Response) => {
     try {
-        const encuestas = await encuestaRepository.obtenerEncuestas(myDataSource);
+        let encuestas = await encuestaRepository.obtenerEncuestas(myDataSource);
+        if (req.usuario.rol === Rol.PROFESOR) {
+            encuestas = encuestas.filter((encuesta: Encuesta) => encuesta.usuarioId === req.usuario.id)
+        }
+        if (req.usuario.rol === Rol.COORDINADOR) {
+            encuestas = encuestas.filter((encuesta: Encuesta) => encuesta.usuarioId === req.usuario.id || encuesta.usuario.coordinadorId === req.usuario.id)
+        }
         res.json(removePasswordFromJSON(encuestas));
     } catch (error) {
         console.error(error);
@@ -176,7 +240,7 @@ app.get("/encuestas", async (req: Request, res: Response) => {
 });
 
 // Obtener una encuesta por su ID
-app.get("/encuestas/:id", async (req: Request, res: Response) => {
+app.get("/encuestas/:id", async (req: RequestWithUsuario, res: Response) => {
     const { id } = req.params;
     try {
         const encuesta = await encuestaRepository.obtenerEncuestaPorId(myDataSource, Number(id));
@@ -192,10 +256,33 @@ app.get("/encuestas/:id", async (req: Request, res: Response) => {
 });
 
 // Crear una nueva encuesta
-app.post("/encuestas", async (req: Request, res: Response) => {
+app.post("/encuestas", async (req: RequestWithUsuario, res: Response) => {
     const encuesta: Encuesta = req.body;
+    const problematica = req.body.problematica;
+    const mayorDificultad = req.body.mayorDificultad;
     try {
         const nuevaEncuesta = await encuestaRepository.crearEncuesta(myDataSource, encuesta);
+        const encuestaProblematicas: EncuestaProblematicasGrupo = {
+            id: null,
+            encuestaId: nuevaEncuesta.id,
+            problematicasGrupoId: problematica,
+            otro: null,
+            encuesta: null,
+            problematicasGrupo: null
+        };
+        await encuestaProblematicasGrupoRepository.crearEncuestaProblematicasGrupo(myDataSource, encuestaProblematicas);
+        mayorDificultad.forEach(async (item: any) => {
+            let dificultadEstudiante: DificultadEstudiantes = {
+                id: null,
+                nombre: null,
+                idEncuesta: nuevaEncuesta.id,
+                razon: item.razon,
+                observacion: item.observacion,
+                encuesta: null,
+            }
+            await dificultadEstudianteRepository.crearDificultadEstudiante(myDataSource, dificultadEstudiante);
+        })
+
         res.json(nuevaEncuesta);
     } catch (error) {
         console.error(error);
@@ -204,7 +291,7 @@ app.post("/encuestas", async (req: Request, res: Response) => {
 });
 
 // Actualizar una encuesta existente
-app.put("/encuestas/:id", async (req: Request, res: Response) => {
+app.put("/encuestas/:id", async (req: RequestWithUsuario, res: Response) => {
     const { id } = req.params;
     const encuesta: Encuesta = req.body;
     try {
@@ -221,7 +308,7 @@ app.put("/encuestas/:id", async (req: Request, res: Response) => {
 });
 
 // Eliminar una encuesta existente
-app.delete("/encuestas/:id", async (req: Request, res: Response) => {
+app.delete("/encuestas/:id", async (req: RequestWithUsuario, res: Response) => {
     const { id } = req.params;
     try {
         const eliminada = await encuestaRepository.eliminarEncuesta(myDataSource, Number(id));
@@ -239,10 +326,22 @@ app.delete("/encuestas/:id", async (req: Request, res: Response) => {
 /**
  * Unidad de aprendizaje
  */
-app.get("/unidades-de-aprendizaje", async (req: Request, res: Response) => {
+app.get("/unidades-de-aprendizaje", async (req: RequestWithUsuario, res: Response) => {
     try {
         const unidad = await unidadDeAprendizajeRepository.obtenerUnidadesDeAprendizaje(myDataSource);
         res.json(unidad);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error al obtener las encuestas" });
+    }
+});
+/**
+ * Unidad de aprendizaje
+ */
+app.get("/problematicas-grupo", async (req: RequestWithUsuario, res: Response) => {
+    try {
+        const problematicasGrupo = await problematicasGrupoRepository.obtenerProblematicasGrupo(myDataSource);
+        res.json(problematicasGrupo);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error al obtener las encuestas" });
@@ -252,7 +351,7 @@ app.get("/unidades-de-aprendizaje", async (req: Request, res: Response) => {
 /**
  * Semestres
  */
-app.get("/semestres", async (req: Request, res: Response) => {
+app.get("/semestres", async (req: RequestWithUsuario, res: Response) => {
     try {
         const semestres = await semestreRepository.obtenerSemestres(myDataSource);
         res.json(semestres);
@@ -262,7 +361,7 @@ app.get("/semestres", async (req: Request, res: Response) => {
     }
 });
 
-app.get("/semestres/:id/grupos", async (req: Request, res: Response) => {
+app.get("/semestres/:id/grupos", async (req: RequestWithUsuario, res: Response) => {
     const { id } = req.params;
     try {
         const grupos = await semestreGrupoRepository.obtenerGrupoPorSemestreId(myDataSource, Number(id));
@@ -282,10 +381,16 @@ app.get("/semestres/:id/grupos", async (req: Request, res: Response) => {
  */
 
 // Obtener todas las reuniones
-app.get('/reuniones', async (req: Request, res: Response) => {
+app.get('/reuniones', async (req: RequestWithUsuario, res: Response) => {
     try {
-        const reuniones = await reunionRepository.obtenerReuniones(myDataSource);
-        res.json(reuniones);
+        let reuniones = await reunionRepository.obtenerReuniones(myDataSource);
+        if (req.usuario.rol === Rol.PROFESOR) {
+            reuniones = reuniones.filter((reunion: Reunion) => reunion.coordinadorId === req.usuario.coordinadorId)
+        }
+        if (req.usuario.rol === Rol.COORDINADOR) {
+            reuniones = reuniones.filter((reunion: Reunion) => reunion.coordinadorId === req.usuario.id)
+        }
+        res.json(removePasswordFromJSON(reuniones));
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Error al obtener las reuniones' });
@@ -293,7 +398,7 @@ app.get('/reuniones', async (req: Request, res: Response) => {
 });
 
 // Obtener una reunión por ID
-app.get('/reuniones/:id', async (req: Request, res: Response) => {
+app.get('/reuniones/:id', async (req: RequestWithUsuario, res: Response) => {
     try {
         const { id } = req.params;
         let reunion = await reunionRepository.obtenerReunionPorId(myDataSource, parseInt(id));
@@ -313,7 +418,7 @@ app.get('/reuniones/:id', async (req: Request, res: Response) => {
 });
 
 // Crear una reunión
-app.post('/reuniones', async (req: Request, res: Response) => {
+app.post('/reuniones', async (req: RequestWithUsuario, res: Response) => {
     try {
         const reunion = req.body as Reunion;
         const nuevaReunion = await reunionRepository.crearReunion(myDataSource, reunion);
@@ -333,13 +438,16 @@ app.post('/reuniones', async (req: Request, res: Response) => {
 });
 
 // Modificar una reunión por ID
-app.put('/reuniones/:id', async (req: Request, res: Response) => {
+app.put('/reuniones/:id', async (req: RequestWithUsuario, res: Response) => {
     try {
         const { id } = req.params;
         const reunion = req.body as Reunion;
+        const asistencias = reunion.asistencias;
+        delete reunion.asistencias;
         const reunionModificada = await reunionRepository.modificarReunion(myDataSource, parseInt(id), reunion);
+        console.error('Termina asistencia');
         await asistenciaRepository.eliminarAsistenciaReunionId(myDataSource, parseInt(id));
-        reunion.asistencias.forEach(async (asistente: any) => {
+        asistencias.forEach(async (asistente: any) => {
             let asistencia = new Asistencia();
             asistencia.usuarioId = asistente;
             asistencia.reunionId = reunionModificada.id;
@@ -359,7 +467,7 @@ app.put('/reuniones/:id', async (req: Request, res: Response) => {
 });
 
 // Modificar una reunión por ID
-app.put('/asistencias/:id', async (req: Request, res: Response) => {
+app.put('/asistencias/:id', async (req: RequestWithUsuario, res: Response) => {
     try {
         const asistenciaId = parseInt(req.params.id);
         const asistenciaRepository = new AsistenciaRepository();
@@ -379,7 +487,7 @@ app.put('/asistencias/:id', async (req: Request, res: Response) => {
 });
 
 // Eliminar una reunión por ID
-app.delete('/reuniones/:id', async (req: Request, res: Response) => {
+app.delete('/reuniones/:id', async (req: RequestWithUsuario, res: Response) => {
     try {
         const { id } = req.params;
         await asistenciaRepository.eliminarAsistenciaReunionId(myDataSource, parseInt(id));
@@ -430,7 +538,7 @@ app.post('/auth', async (req: Request, res: Response) => {
             apellidoMaterno: usuario.apellidoMaterno,
         },
         process.env.JWT_SECRET || 'mi-secreto-super-seguro',
-        { expiresIn: '3h' }
+        { expiresIn: '1h' }
     );
 
     // Enviar la respuesta con el token
@@ -449,7 +557,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-app.post("/upload", upload.single("file"), (req: Request, res: Response) => {
+app.post("/upload", upload.single("file"), (req: RequestWithUsuario, res: Response) => {
     try {
         // si se guardó correctamente, se devuelve la ruta del archivo guardado
         res.send({ success: true, fileUrl: `${req.file.filename}` });
@@ -459,7 +567,7 @@ app.post("/upload", upload.single("file"), (req: Request, res: Response) => {
     }
 })
 
-app.get("/download/:archivo", (req: Request, res: Response) => {
+app.get("/download/:archivo", (req: RequestWithUsuario, res: Response) => {
     const archivo = req.params.archivo;
     const rutaArchivo = path.join(__dirname, "../uploads", archivo);
     console.log(rutaArchivo);

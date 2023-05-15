@@ -7,7 +7,6 @@ import { ComentarioSistema } from "../infrastructure/entity/ComentarioSistema";
 import { DificultadEstudiantes } from "../infrastructure/entity/DificultadEstudiantes";
 import { Documento } from "../infrastructure/entity/Documento";
 import { Encuesta } from "../infrastructure/entity/Encuesta";
-import { EncuestaDificultadEstudiantes } from "../infrastructure/entity/EncuestaDificultadEstudiantes";
 import { EncuestaProblematicasGrupo } from "../infrastructure/entity/EncuestaProblematicasGrupo";
 import { Grupo } from "../infrastructure/entity/Grupo";
 import { ProblematicasGrupo } from "../infrastructure/entity/ProblematicasGrupo";
@@ -29,7 +28,6 @@ export const entities = [
     DificultadEstudiantes,
     Documento,
     Encuesta,
-    EncuestaDificultadEstudiantes,
     EncuestaProblematicasGrupo,
     Grupo,
     ProblematicasGrupo,

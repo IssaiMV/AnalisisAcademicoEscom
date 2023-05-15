@@ -10,8 +10,8 @@ import {
 import { SemestreGrupo } from './SemestreGrupo';
 import { Usuario } from './Usuario';
 import { UnidadDeAprendizaje } from './UnidadDeAprendizaje';
-import { EncuestaDificultadEstudiantes } from './EncuestaDificultadEstudiantes';
 import { EncuestaProblematicasGrupo } from './EncuestaProblematicasGrupo';
+import { DificultadEstudiantes } from './DificultadEstudiantes';
 
 @Entity('encuesta')
 export class Encuesta {
@@ -51,8 +51,8 @@ export class Encuesta {
     @JoinColumn({ name: 'unidad_de_aprendizaje_id' })
     unidadDeAprendizaje: UnidadDeAprendizaje;
 
-    @OneToMany(() => EncuestaDificultadEstudiantes, (encuestaDificultadEstudiantes) => encuestaDificultadEstudiantes.encuesta)
-    encuestaDificultadEstudiantes: EncuestaDificultadEstudiantes[];
+    @OneToMany(() => DificultadEstudiantes, (dificultadEstudiantes) => dificultadEstudiantes.encuesta)
+    dificultades: DificultadEstudiantes[];
 
     @OneToMany(() => EncuestaProblematicasGrupo, (encuestaProblematicasGrupo) => encuestaProblematicasGrupo.encuesta)
     encuestaProblematicasGrupos: EncuestaProblematicasGrupo[];

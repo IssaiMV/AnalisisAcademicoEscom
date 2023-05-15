@@ -150,22 +150,17 @@ CREATE TABLE encuesta (
 CREATE TABLE dificultad_estudiantes (
   id INT NOT NULL AUTO_INCREMENT,
   nombre VARCHAR(50) NOT NULL,
-  PRIMARY KEY (id)
+  id_encuesta INT,
+  razon VARCHAR(50),
+  observacion TEXT,
+  PRIMARY KEY (id),
+  FOREIGN KEY (id) REFERENCES encuesta(id)
 );
 
 CREATE TABLE problematicas_grupo (
   id INT NOT NULL AUTO_INCREMENT,
   nombre VARCHAR(50) NOT NULL,
   PRIMARY KEY (id)
-);
-
-CREATE TABLE encuesta_dificultad_estudiantes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    encuesta_id INT,
-    dificultad_estudiantes_id INT,
-    otro VARCHAR(255),
-    FOREIGN KEY (encuesta_id) REFERENCES encuesta(id),
-    FOREIGN KEY (dificultad_estudiantes_id) REFERENCES dificultad_estudiantes(id)
 );
 
 CREATE TABLE encuesta_problematicas_grupo (
