@@ -3,17 +3,17 @@ import {
     PrimaryGeneratedColumn,
     Column,
     OneToMany,
-} from 'typeorm';
-import { EncuestaProblematicasGrupo } from './EncuestaProblematicasGrupo';
+} from 'typeorm'
+import { EncuestaProblematicasGrupo } from './EncuestaProblematicasGrupo'
 
 @Entity('problematicas_grupo')
 export class ProblematicasGrupo {
     @PrimaryGeneratedColumn()
-    id: number;
+    id: number
 
     @Column({ type: 'varchar', length: 50 })
-    nombre: string;
+    nombre: string
 
     @OneToMany(() => EncuestaProblematicasGrupo, (encuestaProblematicasGrupo) => encuestaProblematicasGrupo.problematicasGrupo)
-    encuestaProblematicasGrupo: EncuestaProblematicasGrupo[];
+    encuestaProblematicasGrupo: EncuestaProblematicasGrupo[]
 }

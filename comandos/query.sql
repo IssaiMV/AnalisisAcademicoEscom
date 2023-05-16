@@ -142,9 +142,7 @@ CREATE TABLE encuesta (
   usuario_id INT NOT NULL,
   unidad_de_aprendizaje_id INT NOT NULL,
   PRIMARY KEY (id),
-  FOREIGN KEY (semestre_grupo_id) REFERENCES semestre_grupo(id),
-  FOREIGN KEY (usuario_id) REFERENCES usuario(id),
-  FOREIGN KEY (unidad_de_aprendizaje_id) REFERENCES unidad_de_aprendizaje(id)
+  FOREIGN KEY (usuario_id) REFERENCES usuario(id)
 );
 
 CREATE TABLE dificultad_estudiantes (
@@ -153,8 +151,8 @@ CREATE TABLE dificultad_estudiantes (
   id_encuesta INT,
   razon VARCHAR(50),
   observacion TEXT,
-  PRIMARY KEY (id),
-  FOREIGN KEY (id) REFERENCES encuesta(id)
+  encuestaId INT,
+  PRIMARY KEY (id)
 );
 
 CREATE TABLE problematicas_grupo (
@@ -167,7 +165,5 @@ CREATE TABLE encuesta_problematicas_grupo (
     id INT AUTO_INCREMENT PRIMARY KEY,
     encuesta_id INT,
     problematicas_grupo_id INT,
-    otro VARCHAR(255),
-    FOREIGN KEY (encuesta_id) REFERENCES encuesta(id),
-    FOREIGN KEY (problematicas_grupo_id) REFERENCES problematicas_grupo(id)
+    otro VARCHAR(255)
 );

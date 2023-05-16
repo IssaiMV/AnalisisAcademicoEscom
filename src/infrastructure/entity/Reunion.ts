@@ -5,11 +5,11 @@ import {
     ManyToOne,
     OneToMany,
     JoinColumn,
-} from 'typeorm';
-import { Usuario } from './Usuario';
-import { Asistencia } from './Asistencia';
-import { Acuerdo } from './Acuerdo';
-import { ComentarioReunion } from './ComentarioReunion';
+} from 'typeorm'
+import { Usuario } from './Usuario'
+import { Asistencia } from './Asistencia'
+import { Acuerdo } from './Acuerdo'
+import { ComentarioReunion } from './ComentarioReunion'
 
 export enum Estatus {
     Realizada = 'Realizada',
@@ -20,36 +20,36 @@ export enum Estatus {
 @Entity('reunion')
 export class Reunion {
     @PrimaryGeneratedColumn()
-    id: number;
+    id: number
 
     @Column({ length: 255 })
-    titulo: string;
+    titulo: string
 
     @Column({ type: 'text' })
-    descripcion: string;
+    descripcion: string
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    fecha_hora: Date;
+    fecha_hora: Date
 
     @Column({ length: 255 })
-    enlace: string;
+    enlace: string
 
     @Column({ nullable: true, name: 'coordinador_id' })
-    coordinadorId: number;
+    coordinadorId: number
 
     @ManyToOne(() => Usuario, (usuario) => usuario.reuniones)
     @JoinColumn({ name: 'coordinador_id' })
-    coordinador: Usuario;
+    coordinador: Usuario
 
     @Column({ type: 'enum', enum: Estatus })
-    estatus: Estatus;
+    estatus: Estatus
 
     @OneToMany(() => Asistencia, (asistencia) => asistencia.reunion)
-    asistencias: Asistencia[];
+    asistencias: Asistencia[]
 
     @OneToMany(() => Acuerdo, (acuerdo) => acuerdo.reunion)
-    acuerdos: Acuerdo[];
+    acuerdos: Acuerdo[]
 
     @OneToMany(() => ComentarioReunion, comentario => comentario.reunion)
-    comentarios: ComentarioReunion[];
+    comentarios: ComentarioReunion[]
 }

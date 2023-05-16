@@ -3,27 +3,27 @@ import {
     PrimaryGeneratedColumn,
     Column,
     ManyToOne,
-} from 'typeorm';
-import { Encuesta } from './Encuesta';
+} from 'typeorm'
+import { Encuesta } from './Encuesta'
 
 @Entity('dificultad_estudiantes')
 export class DificultadEstudiantes {
 
     @PrimaryGeneratedColumn()
-    id: number;
+    id: number
 
     @Column({ type: 'varchar', length: 50 })
-    nombre: string;
+    nombre: string
 
-    @Column({ type: 'int', nullable: false, name: 'id_encuesta' })
-    idEncuesta: number;
+    @Column({ name: 'id_encuesta' })
+    encuestaId: number
 
     @Column({ type: 'varchar', length: 50, nullable: true })
-    razon: string;
+    razon: string
 
     @Column({ type: 'text', nullable: true })
-    observacion: string;
+    observacion: string
 
     @ManyToOne(() => Encuesta, (encuesta) => encuesta.dificultades)
-    encuesta: Encuesta;
+    encuesta: Encuesta
 }

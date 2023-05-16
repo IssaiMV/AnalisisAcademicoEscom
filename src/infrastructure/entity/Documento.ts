@@ -5,9 +5,9 @@ import {
     ManyToOne,
     JoinColumn,
     OneToMany,
-} from 'typeorm';
-import { ComentarioDocumento } from './ComentarioDocumento';
-import { Usuario } from './Usuario';
+} from 'typeorm'
+import { ComentarioDocumento } from './ComentarioDocumento'
+import { Usuario } from './Usuario'
 
 export enum TipoDocumento {
     Evidencia = 'Evidencia',
@@ -17,30 +17,30 @@ export enum TipoDocumento {
 @Entity('documento')
 export class Documento {
     @PrimaryGeneratedColumn()
-    id: number;
+    id: number
 
     @Column({ name: 'id_usuario' })
-    usuarioId: number;
+    usuarioId: number
 
     @Column({ length: 255 })
-    nombre: string;
+    nombre: string
 
     @Column({ length: 255 })
-    ruta: string;
+    ruta: string
 
     @Column({ type: 'enum', enum: TipoDocumento, default: TipoDocumento.Evidencia })
-    tipo: TipoDocumento;
+    tipo: TipoDocumento
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    fecha_hora: Date;
+    fecha_hora: Date
 
     @ManyToOne(() => Usuario, (usuario) => usuario.documentos)
     @JoinColumn({ name: 'id_usuario' })
-    usuario: Usuario;
+    usuario: Usuario
 
     @OneToMany(
         () => ComentarioDocumento,
         (comentarioDocumento) => comentarioDocumento.documento,
     )
-    comentarios: ComentarioDocumento[];
+    comentarios: ComentarioDocumento[]
 }

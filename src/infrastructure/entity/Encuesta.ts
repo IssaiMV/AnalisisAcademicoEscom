@@ -6,54 +6,54 @@ import {
     JoinColumn,
     OneToMany,
     JoinTable,
-} from 'typeorm';
-import { SemestreGrupo } from './SemestreGrupo';
-import { Usuario } from './Usuario';
-import { UnidadDeAprendizaje } from './UnidadDeAprendizaje';
-import { EncuestaProblematicasGrupo } from './EncuestaProblematicasGrupo';
-import { DificultadEstudiantes } from './DificultadEstudiantes';
+} from 'typeorm'
+import { SemestreGrupo } from './SemestreGrupo'
+import { Usuario } from './Usuario'
+import { UnidadDeAprendizaje } from './UnidadDeAprendizaje'
+import { EncuestaProblematicasGrupo } from './EncuestaProblematicasGrupo'
+import { DificultadEstudiantes } from './DificultadEstudiantes'
 
 @Entity('encuesta')
 export class Encuesta {
     @PrimaryGeneratedColumn()
-    id: number;
+    id: number
 
     @Column({ name: 'cantidad_alumnos' })
-    cantidadAlumnos: number;
+    cantidadAlumnos: number
 
     @Column({ name: 'cantidad_aprobados' })
-    cantidadAprobados: number;
+    cantidadAprobados: number
 
     @Column({ name: 'cantidad_reprobados' })
-    cantidadReprobados: number;
+    cantidadReprobados: number
 
     @Column({ type: 'text', nullable: true })
-    observaciones: string | null;
+    observaciones: string | null
 
     @Column({ name: 'semestre_grupo_id' })
-    semestreGrupoId: number;
+    semestreGrupoId: number
 
     @Column({ name: 'usuario_id' })
-    usuarioId: number;
+    usuarioId: number
 
     @Column({ name: 'unidad_de_aprendizaje_id' })
-    unidadDeAprendizajeId: number;
+    unidadDeAprendizajeId: number
 
     @ManyToOne(() => SemestreGrupo, (semestreGrupo) => semestreGrupo.encuestas)
     @JoinColumn({ name: 'semestre_grupo_id' })
-    semestreGrupo: SemestreGrupo;
+    semestreGrupo: SemestreGrupo
 
     @ManyToOne(() => Usuario, (usuario) => usuario.encuestas)
     @JoinColumn({ name: 'usuario_id' })
-    usuario: Usuario;
+    usuario: Usuario
 
     @ManyToOne(() => UnidadDeAprendizaje, (unidadDeAprendizaje) => unidadDeAprendizaje.encuestas)
     @JoinColumn({ name: 'unidad_de_aprendizaje_id' })
-    unidadDeAprendizaje: UnidadDeAprendizaje;
+    unidadDeAprendizaje: UnidadDeAprendizaje
 
     @OneToMany(() => DificultadEstudiantes, (dificultadEstudiantes) => dificultadEstudiantes.encuesta)
-    dificultades: DificultadEstudiantes[];
+    dificultades: DificultadEstudiantes[]
 
     @OneToMany(() => EncuestaProblematicasGrupo, (encuestaProblematicasGrupo) => encuestaProblematicasGrupo.encuesta)
-    encuestaProblematicasGrupos: EncuestaProblematicasGrupo[];
+    encuestaProblematicasGrupos: EncuestaProblematicasGrupo[]
 }

@@ -3,20 +3,20 @@ import {
     PrimaryGeneratedColumn,
     Column,
     OneToMany,
-} from 'typeorm';
-import { Encuesta } from './Encuesta';
+} from 'typeorm'
+import { Encuesta } from './Encuesta'
 
 @Entity('unidad_de_aprendizaje')
 export class UnidadDeAprendizaje {
     @PrimaryGeneratedColumn()
-    id: number;
+    id: number
 
     @Column({ length: 50 })
-    nombre: string;
+    nombre: string
 
     @Column({ length: 10 })
-    codigo: string;
+    codigo: string
 
     @OneToMany(() => Encuesta, (encuesta) => encuesta.unidadDeAprendizaje)
-    encuestas: Encuesta[];
+    encuestas: Encuesta[]
 }

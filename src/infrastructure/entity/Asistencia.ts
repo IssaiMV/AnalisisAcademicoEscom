@@ -4,32 +4,32 @@ import {
     Column,
     ManyToOne,
     JoinColumn,
-} from 'typeorm';
-import { Usuario } from './Usuario';
-import { Reunion } from './Reunion';
+} from 'typeorm'
+import { Usuario } from './Usuario'
+import { Reunion } from './Reunion'
 
 @Entity('asistencia')
 export class Asistencia {
     @PrimaryGeneratedColumn()
-    id: number;
+    id: number
 
     @Column({ name: 'id_usuario' })
-    usuarioId: number;
+    usuarioId: number
 
     @Column({ name: 'id_reunion' })
-    reunionId: number;
+    reunionId: number
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    fecha_hora: Date;
+    fecha_hora: Date
 
     @Column({ type: 'tinyint', default: 1 })
-    asistio: number;
+    asistio: number
 
     @ManyToOne(() => Usuario, (usuario) => usuario.asistencias)
     @JoinColumn({ name: 'id_usuario' })
-    usuario: Usuario;
+    usuario: Usuario
 
     @ManyToOne(() => Reunion, (reunion) => reunion.asistencias)
     @JoinColumn({ name: 'id_reunion' })
-    reunion: Reunion;
+    reunion: Reunion
 }

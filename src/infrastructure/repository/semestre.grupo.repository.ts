@@ -1,6 +1,6 @@
-import { SemestreGrupo } from "../entity/SemestreGrupo";
-import { GrupoRepository } from "./grupo.repository";
-import { SemestreRepository } from "./semestre.repository";
+import { SemestreGrupo } from "../entity/SemestreGrupo"
+import { GrupoRepository } from "./grupo.repository"
+import { SemestreRepository } from "./semestre.repository"
 
 export class SemestreGrupoRepository {
 
@@ -13,7 +13,7 @@ export class SemestreGrupoRepository {
     async crearSemestreGrupo(myDataSource: any, semestreGrupo: SemestreGrupo): Promise<SemestreGrupo> {
         const entity = await myDataSource.getRepository(SemestreGrupo).create(semestreGrupo)
         const results = await myDataSource.getRepository(SemestreGrupo).save(entity)
-        return results;
+        return results
     }
 
     async obtenerSemestresGrupos(myDataSource: any): Promise<SemestreGrupo[]> {
@@ -23,14 +23,14 @@ export class SemestreGrupoRepository {
                 grupo: true,
             }
         })
-        return entities;
+        return entities
     }
 
     async obtenerSemestreGrupoPorId(myDataSource: any, id: number): Promise<SemestreGrupo | undefined> {
         const results = await myDataSource.getRepository(SemestreGrupo).findOneBy({
             id: id
         })
-        return results;
+        return results
     }
     async obtenerGrupoPorSemestreId(myDataSource: any, id: number): Promise<SemestreGrupo | undefined> {
         const results = await myDataSource.getRepository(SemestreGrupo).find({
@@ -39,20 +39,20 @@ export class SemestreGrupoRepository {
                 semestreId: id
             }
         })
-        return results;
+        return results
     }
 
     async modificarSemestreGrupo(myDataSource: any, id: number, semestreGrupo: SemestreGrupo): Promise<SemestreGrupo | undefined> {
-        const entityExistente = await myDataSource.findOne(SemestreGrupo, id);
+        const entityExistente = await myDataSource.findOne(SemestreGrupo, id)
         if (entityExistente) {
-            const entityModificado = Object.assign(entityExistente, semestreGrupo);
-            return await myDataSource.getRepository(SemestreGrupo).save(entityModificado);
+            const entityModificado = Object.assign(entityExistente, semestreGrupo)
+            return await myDataSource.getRepository(SemestreGrupo).save(entityModificado)
         }
-        return undefined;
+        return undefined
     }
 
     async eliminarSemestreGrupo(myDataSource: any, id: number): Promise<boolean> {
-        const results = await myDataSource.getRepository(SemestreGrupo).delete(id);
-        return results.affected !== 0;
+        const results = await myDataSource.getRepository(SemestreGrupo).delete(id)
+        return results.affected !== 0
     }
 }

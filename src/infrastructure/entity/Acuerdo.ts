@@ -4,33 +4,33 @@ import {
     Column,
     ManyToOne,
     JoinColumn,
-} from 'typeorm';
-import { Reunion } from './Reunion';
-import { Usuario } from './Usuario';
+} from 'typeorm'
+import { Reunion } from './Reunion'
+import { Usuario } from './Usuario'
 
 @Entity('acuerdo')
 export class Acuerdo {
     @PrimaryGeneratedColumn()
-    id: number;
+    id: number
 
     @Column({ type: 'int' })
-    reunionId: number;
+    reunionId: number
 
     @ManyToOne(() => Reunion, reunion => reunion.acuerdos)
-    reunion: Reunion;
+    reunion: Reunion
 
     @Column({ type: 'int' })
-    coordinadorId: number;
+    coordinadorId: number
 
     @ManyToOne(() => Usuario, usuario => usuario.acuerdos)
-    coordinador: Usuario;
+    coordinador: Usuario
 
     @Column()
-    titulo: string;
+    titulo: string
 
     @Column()
-    descripcion: string;
+    descripcion: string
 
     @Column()
-    fechaHora: Date;
+    fechaHora: Date
 }
